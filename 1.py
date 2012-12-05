@@ -6,7 +6,7 @@ import random
 
 low = 100
 high = 900
-size = 100
+size = 25
 col = row = np.sqrt(size)
 alpha = 5
 beta = 1
@@ -176,7 +176,10 @@ class  Ant:
         tau[self.T[-2]][self.T[-1]] += self.delta_tau/5.0
 
 
-
+        #Просто дописываем последнюю
+        if len(self.T) == int(row):
+            self.T.append(self.T[0])
+            self.L = calc_distance(self.T)
         
 
 
@@ -207,9 +210,11 @@ class ann_imitation:
             else:
                 self.temperature *= self.cool_rating
     def run(self):
+        ind_iter = 0
         while(self.temperature > 0.1):
+            ind_iter +=1
             self.one_iter()
-            print "Way: %s and size: %s temperature:%s" %(self.curr_solution,self.curr_solution_mark,self.temperature)
+            print "Iteration:%s  Way: %s and size: %s temperature:%s" %(ind_iter, self.curr_solution,self.curr_solution_mark,self.temperature)
 
 
 #Количество муравьев равно количеству городов
@@ -230,8 +235,8 @@ class AntColony:
             for ant in self.colony:
                 ant.go_to_next_city()
         #Просто приписываю последнюю вершину
-        for ant in self.colony:
-            ant.T.append(ant.T[0])
+#        for ant in self.colony:
+#            ant.T.append(ant.T[0])
         print "Муравьиная колония:"
 #        print tau
         for ant in self.colony:
@@ -264,7 +269,7 @@ class AntColony:
 
 
 
-start = 4
+start = 1
 
 ##print tau
 #for x in range(10):
