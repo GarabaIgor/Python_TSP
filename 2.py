@@ -2,13 +2,12 @@
 import numpy as np
 
 import random
-13
 low = 100
 high = 1000
-size = 169
+size = 25
 col = row = np.sqrt(size)
-alpha = 4
-beta = 2.5
+alpha = 1
+beta = 5
 #graph = np.random.randint(low,high,(size,)).reshape(row,col)
 
 #graph = np.array([[110, 510, 788, 191, 130, 559, 772, 647, 801, 563, 872, 683, 130,
@@ -238,6 +237,15 @@ class  Ant:
         Lk = calc_distance(self.T)
 
         tau[self.T[-2]][self.T[-1]] += self.delta_tau/Lk
+    def add_pher2(self):
+        way = self.T[:]
+        way.append(self.T[0])
+        Q = 1000.0
+        self.L = calc_distance(way)
+        self.delta_tau = Q/self.L
+
+        for x in range(len(way)-1):
+            tau[way[x]][way[x+1]] = tau[way[x]][way[x+1]] * 0.5 + self.delta_tau
 
 class AntColony:
     def __init__(self,start):
@@ -255,9 +263,9 @@ class AntColony:
                 ant.go_to_next_city()
                 ant.see()
                 #Все перешли в города, а потом феромоны изменились(подсыпали испарилось)
-            for ant in self.colony:
-                ant.add_pher()
-
+        for ant in self.colony:
+#                ant.add_pher()
+            ant.add_pher2()
                 #Просто приписываю последнюю вершину
             #        for ant in self.colony:
             #            ant.T.append(ant.T[0])
