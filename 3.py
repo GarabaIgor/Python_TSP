@@ -103,9 +103,10 @@ class neighbour:
             self.near(minInd,near_list)
 
 class  Ant:
-    city_quant = row-1
+    start_city = 0
 
     def __init__(self,start):
+
         self.J = range(int(row))
         self.J.remove(start)
         self.T = []
@@ -140,7 +141,8 @@ class  Ant:
         if len(self.J) == 1:
             self.next_city = self.J[-1]
         elif len(self.J) == 0:
-            self.next_city = self.T[0]
+#            self.next_city = self.T[0]
+            return
         else:
             self.rul_list = []
             for x in range(int(row)):
@@ -161,49 +163,105 @@ class  Ant:
                     break
 
     def go_to_next_city(self):
-        self.T.append(self.next_city)
-        if self.J:
+        if len(self.J) != 0:
+            self.T.append(self.next_city)
             self.J.remove(self.next_city)
+
+
 #            print self.J
 #            print self.T
-        else:
-            self.L = calc_distance(self.T)
-            self.change_pher()
-            print "Length: " + "-"*80 + "%d" % self.L
-            print self.T
+#        else:
+#            self.L = calc_distance(self.T)
+#            self.change_pher()
+#            print "Length: " + "-"*80 + "%d" % self.L
+#            print self.T
 
 
-    def change_pher(self):
-#        way = self.T[:]
-#        way.append(self.T[0])
-        Q = 50
-        ro = 0.9
-        self.L = calc_distance(self.T)
-        self.delta_tau = Q/self.L
-        print "delta tau: %f" % self.delta_tau
-        for x in range(len(self.T)-1):
-            tau[self.T[x]][self.T[x+1]] += self.delta_tau
-        for x in range(int(row)):
-            for y in range(int(row)):
-                if x!=y:
-                    if tau[x][y]<=0: tau[x][y] = np.random.uniform(1.0,3.0)
-                    else: tau[x][y] *= ro
+#    def change_pher(self):
+##        way = self.T[:]
+##        way.append(self.T[0])
+#        Q = 50
+#        ro = 0.9
+#        self.L = calc_distance(self.T)
+#        self.delta_tau = Q/self.L
+#        print "delta tau: %f" % self.delta_tau
+#        for x in range(len(self.T)-1):
+#            tau[self.T[x]][self.T[x+1]] += self.delta_tau
+#        for x in range(int(row)):
+#            for y in range(int(row)):
+#                if x!=y:
+#                    if tau[x][y]<=0: tau[x][y] = np.random.uniform(1.0,3.0)
+#                    else: tau[x][y] *= ro
 
+
+class AntColony:
+    def __init__(self,city_count,start_city,Q=50,ro=0.9):
+        self.Q = Q
+        self.ro = ro
+        self.city_count = city_count
+        self.start_city = start_city
+
+    def init_ants(self):
+        self.ant_list = [Ant(start_for_ant) for start_for_ant in range(self.city_count)]
+    def run_ants(self):
+        self.init_ants()
+        #Каждый муравей
+        for ant in self.ant_list:
+            #Проходит все вершины
+            for x in range(self.city_count):
+                ant.calc_prob()
+                ant.calc_next_city()
+                ant.go_to_next_city()
+        self.chage_pher()
+    def chage_pher(self):
+        for ant in self.ant_list:
+#            print ant.T
+            #"Разворачиваем" путь
+            start_city_ind = ant.T.index(self.start_city)
+            ant.T = ant.T[start_city_ind:] + ant.T[:start_city_ind]
+            ant.T.append(self.start_city)
+#            print ant.T
+
+            self.Q = 50
+            self.ro = 0.9
+            ant.L = calc_distance(ant.T)
+            ant.delta_tau = self.Q/ant.L
+#            print "delta tau: %f" % ant.delta_tau
+            for x in range(len(ant.T)-1):
+                tau[ant.T[x]][ant.T[x+1]] += ant.delta_tau
+            for x in range(int(row)):
+                for y in range(int(row)):
+                    if x!=y:
+                        if tau[x][y]<=0.0: tau[x][y] = np.random.uniform(1.0,3.0)
+                        else: tau[x][y] *= self.ro
+    def run_AntColony(self,iterCount=10):
+        for x in range(iterCount):
+            self.run_ants()
+            self.print_results()
+            print tau
+    def print_results(self):
+        for ant in self.ant_list:
+            print "Way: %s = %s" %(str(ant.T),str(calc_distance(ant.T)))
 
 print tau
 print
 
+colony_obj = AntColony(4,0)
+colony_obj.run_AntColony()
 
 
-for x in range(10):
-    obj = Ant(0)
-    for x in range(int(row)):
 
-        obj.calc_prob()
-        obj.calc_next_city()
-        obj.go_to_next_city()
-#    print x
-    print tau
+
+
+#for x in range(10):
+#    obj = Ant(0)
+#    for x in range(int(row)):
+#
+#        obj.calc_prob()
+#        obj.calc_next_city()
+#        obj.go_to_next_city()
+##    print x
+#    print tau
 
 #print [x.argmax() for x in tau]
 
