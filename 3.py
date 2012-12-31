@@ -50,6 +50,58 @@ def calc_distance(way):
         #print "Distance of %s  is  %s" % (way,self.L)
     return distance
 
+class neighbour:
+    def __init__(self,):
+        self.near_list = []
+        self.near_listS = []
+    def get_near(self,start):
+        self.near(start,self.near_list)
+        self.near_list.append(int(start))
+        return self.near_list[:]
+    def get_near2(self,start):
+        self.near(start,self.near_list)
+        #self.near_list.append(int(start))
+        return self.near_list[:]
+    def get_near_all(self,start):
+        for x in range(int(row)):
+            self.near_list = []
+            self.near_listS.append(self.get_near2(x))
+        for y in self.near_listS:
+            self.roll_list(y,start)
+        return self.near_listS[:]
+    def roll_list(self,l,start):
+        print l
+        start_index = l.index(start)
+        result_list = l[start_index:] +l[:start_index]
+
+        result_list.append(start)
+        print result_list,calc_distance(result_list)
+
+    def near(self,start,near_list):
+        #global self.near_list
+        if not near_list:
+            near_list.append(int(start))
+
+        if len(near_list) == row:
+            #print "!!!!!%s" % self.near_list
+            return
+        #for graphRow in graph:
+        else:
+            nonZeroIndexes = np.nonzero(graph[start])[0]
+            min = graph[start].max()
+
+            minInd = graph[start].argmax()
+
+            for nonZeroInd in nonZeroIndexes:
+                if (nonZeroInd not in near_list) and (graph[start][nonZeroInd] <= min):
+                    minInd = nonZeroInd
+                    min = graph[start][nonZeroInd]
+                    #self.near_list.append(minInd)
+
+
+            near_list.append(minInd)
+            self.near(minInd,near_list)
+
 class  Ant:
     city_quant = row-1
 
@@ -117,14 +169,14 @@ class  Ant:
         else:
             self.L = calc_distance(self.T)
             self.change_pher()
-            print "Length: ---------------------------------------------------------%d" % self.L
+            print "Length: " + "-"*80 + "%d" % self.L
             print self.T
 
 
     def change_pher(self):
 #        way = self.T[:]
 #        way.append(self.T[0])
-        Q = 100
+        Q = 50
         ro = 0.9
         self.L = calc_distance(self.T)
         self.delta_tau = Q/self.L
@@ -134,10 +186,13 @@ class  Ant:
         for x in range(int(row)):
             for y in range(int(row)):
                 if x!=y:
-                    tau[x][y] *= ro
+                    if tau[x][y]<=0: tau[x][y] = np.random.uniform(1.0,3.0)
+                    else: tau[x][y] *= ro
+
 
 print tau
 print
+
 
 
 for x in range(10):
@@ -150,9 +205,19 @@ for x in range(10):
 #    print x
     print tau
 
+#print [x.argmax() for x in tau]
+
+
 print "graph:"
 print graph
 #print "tau:"
 #print tau
 #print "nu:"
 #print obj.nu
+
+
+print "Иди в ближний выходим из стартовой:"
+n_obj = neighbour()
+n_obj.get_near(0)
+print "T: %s L:%s " % (n_obj.near_list, calc_distance(n_obj.near_list))
+
